@@ -16,7 +16,7 @@ func main() {
 
 	serverAddress := types.NewServerAddress(config.Envs.PublicHost, config.Envs.Port)
 	server := api.NewAPIServer(serverAddress, db)
-	if err := server.StartServer(); err != nil {
+	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

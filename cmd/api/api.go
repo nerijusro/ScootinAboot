@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nerijusro/scootinAboot/services"
+	"github.com/nerijusro/scootinAboot/services/scooter"
 	"github.com/nerijusro/scootinAboot/types"
 )
 
@@ -13,16 +13,17 @@ type APIServer struct {
 	db      *sql.DB
 }
 
-var ginEngine = gin.Default()
-
 func NewAPIServer(address *types.ServerAddress, db *sql.DB) *APIServer {
 	return &APIServer{address: address, db: db}
 }
 
-func (s *APIServer) StartServer() error {
+func (s *APIServer) Run() error {
+	ginEngine := gin.Default()
+
 	//Padaryt su DI
-	var handler services.ScootersHandler
-	handler.RegisterEndpoints(ginEngine)
+	scootersRepository := scooter.NewScootersRepository(s.db)
+	scootersHandler := scooter.NewScootersHandler(scootersRepository)
+	scootersHandler.RegisterEndpoints(ginEngine)
 
 	ginEngine.Run(s.address.String())
 	return nil
