@@ -14,8 +14,9 @@ import (
 func TestScootersHandler(t *testing.T) {
 	scootersRepository := &mockScootersRepository{}
 	authService := &mockAuthService{}
+	validator := &mockScooterRequestValidator{} // Add this line
 
-	scootersHandler := NewScootersHandler(scootersRepository, authService)
+	scootersHandler := NewScootersHandler(scootersRepository, authService, validator) // Update this line
 
 	t.Run("Should pass given valid request body while creating scooter", func(t *testing.T) {
 		requestBody := types.CreateScooterRequest{
@@ -40,6 +41,28 @@ func TestScootersHandler(t *testing.T) {
 			t.Errorf("expected status code %d but got %d", http.StatusCreated, responseRecoreder.Code)
 		}
 	})
+}
+
+type mockScooterRequestValidator struct{}
+
+// ValidateCreateScooterRequest implements types.IScootersValidator.
+func (m *mockScooterRequestValidator) ValidateCreateScooterRequest(request *types.CreateScooterRequest) error {
+	panic("unimplemented")
+}
+
+// ValidateGetScootersQueryParameters implements types.IScootersValidator.
+func (m *mockScooterRequestValidator) ValidateGetScootersQueryParameters(queryParams *types.GetScootersQueryParameters) error {
+	panic("unimplemented")
+}
+
+// ValidateCreateScooterRequest implements types.IScooterRequestValidator.
+func (m *mockScooterRequestValidator) GetAndValidateCreateScooterRequest(request types.CreateScooterRequest) error {
+	panic("unimplemented")
+}
+
+// ValidateGetScootersQueryParameters implements types.IScooterRequestValidator.
+func (m *mockScooterRequestValidator) GetAndValidateGetScootersQueryParameters(queryParams types.GetScootersQueryParameters) error {
+	panic("unimplemented")
 }
 
 type mockScootersRepository struct{}

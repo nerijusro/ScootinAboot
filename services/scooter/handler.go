@@ -9,12 +9,13 @@ import (
 )
 
 type ScooterHandler struct {
-	repository  types.IScootersRepository
-	authService types.IAuthService
+	repository       types.IScootersRepository
+	authService      types.IAuthService
+	requestValidator types.IScootersValidator
 }
 
-func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService) *ScooterHandler {
-	return &ScooterHandler{repository: repository, authService: authService}
+func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService, validator types.IScootersValidator) *ScooterHandler {
+	return &ScooterHandler{repository: repository, authService: authService, requestValidator: validator}
 }
 
 func (h *ScooterHandler) RegisterEndpoints(e *gin.Engine) {
@@ -30,10 +31,14 @@ func (h *ScooterHandler) createScooter(c *gin.Context) {
 		return
 	}
 
-	//Galima turbut perkelt i validacija.go
 	var scooterRequest types.CreateScooterRequest
 	if err := c.BindJSON(&scooterRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})
+		return
+	}
+
+	if err := h.requestValidator.ValidateCreateScooterRequest(&scooterRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}
 
@@ -60,6 +65,11 @@ func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 
 	var queryParameters types.GetScootersQueryParameters
 	if err := c.BindQuery(&queryParameters); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
+		return
+	}
+
+	if err := h.requestValidator.ValidateGetScootersQueryParameters(&queryParameters); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}

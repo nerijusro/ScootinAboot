@@ -36,7 +36,8 @@ func (s *APIServer) Run() error {
 	clientHandler.RegisterEndpoints(ginEngine)
 
 	scootersRepository := scooter.NewScootersRepository(s.db)
-	scootersHandler := scooter.NewScootersHandler(scootersRepository, authService)
+	scootersRequestValidator := scooter.NewScootersValidator()
+	scootersHandler := scooter.NewScootersHandler(scootersRepository, authService, scootersRequestValidator)
 	scootersHandler.RegisterEndpoints(ginEngine)
 
 	ginEngine.Run(s.address.String())

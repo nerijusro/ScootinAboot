@@ -13,12 +13,12 @@ type Scooter struct {
 }
 
 type Location struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude" validate:"required"`
+	Longitude float64 `json:"longitude" validate:"required"`
 }
 
 type CreateScooterRequest struct {
-	Location    Location `json:"location"`
+	Location    Location `json:"location" validate:"required"`
 	IsAvailable bool     `json:"is_available"`
 }
 
@@ -56,11 +56,11 @@ type CreateUserRequest struct {
 }
 
 type GetScootersQueryParameters struct {
-	Availability string  `form:"availability"`
-	X1           float64 `form:"x1"`
-	X2           float64 `form:"x2"`
-	Y1           float64 `form:"y1"`
-	Y2           float64 `form:"y2"`
+	Availability string  `form:"availability" validate:"required"`
+	X1           float64 `form:"x1" validate:"required"`
+	X2           float64 `form:"x2" validate:"required"`
+	Y1           float64 `form:"y1" validate:"required"`
+	Y2           float64 `form:"y2" validate:"required"`
 }
 
 type Availability string
@@ -70,3 +70,8 @@ const (
 	Unavailable Availability = "unavailable"
 	All         Availability = "all"
 )
+
+type IScootersValidator interface {
+	ValidateCreateScooterRequest(request *CreateScooterRequest) error
+	ValidateGetScootersQueryParameters(queryParams *GetScootersQueryParameters) error
+}
