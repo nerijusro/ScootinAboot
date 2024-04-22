@@ -1,6 +1,9 @@
 package types
 
-import "github.com/google/uuid"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
 
 type Scooter struct {
 	ID          uuid.UUID `json:"id"`
@@ -23,4 +26,16 @@ type IScootersRepository interface {
 	GetScooterById(id string) (*Scooter, error)
 	GetScooters() ([]*Scooter, error)
 	CreateScooter(scooter Scooter) error
+}
+
+type AuthResponse struct {
+	StaticApiKey string
+}
+
+type IAuthService interface {
+	GetAdminApiKey() string
+	GetUserApiKey() string
+
+	AuthenticateAdmin(c *gin.Context) bool
+	AuthenticateUser(c *gin.Context) bool
 }

@@ -9,11 +9,12 @@ import (
 )
 
 type ScootersHandler struct {
-	repository types.IScootersRepository
+	repository  types.IScootersRepository
+	authService types.IAuthService
 }
 
-func NewScootersHandler(repository types.IScootersRepository) *ScootersHandler {
-	return &ScootersHandler{repository: repository}
+func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService) *ScootersHandler {
+	return &ScootersHandler{repository: repository, authService: authService}
 }
 
 func (h *ScootersHandler) RegisterEndpoints(e *gin.Engine) {
@@ -23,6 +24,11 @@ func (h *ScootersHandler) RegisterEndpoints(e *gin.Engine) {
 }
 
 func (h *ScootersHandler) createScooter(c *gin.Context) {
+	if !h.authService.AuthenticateAdmin(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	//Galima turbut perkelt i validacija.go
 	var scooterRequest types.CreateScooterRequest
 	if err := c.BindJSON(&scooterRequest); err != nil {
@@ -38,7 +44,7 @@ func (h *ScootersHandler) createScooter(c *gin.Context) {
 
 	err := h.repository.CreateScooter(scooter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
 		return
 	}
 
@@ -46,9 +52,14 @@ func (h *ScootersHandler) createScooter(c *gin.Context) {
 }
 
 func (h *ScootersHandler) getScooters(c *gin.Context) {
+	if !h.authService.AuthenticateUser(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	allScooters, err := h.repository.GetScooters()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
 		return
 	}
 
@@ -56,6 +67,11 @@ func (h *ScootersHandler) getScooters(c *gin.Context) {
 }
 
 func (h *ScootersHandler) getScooter(c *gin.Context) {
+	if !h.authService.AuthenticateUser(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id := c.Param("id")
 	idInUUID, err := uuid.Parse(id)
 	if err != nil {

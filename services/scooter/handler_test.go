@@ -13,7 +13,9 @@ import (
 
 func TestScootersHandler(t *testing.T) {
 	scootersRepository := &mockScootersRepository{}
-	scootersHandler := NewScootersHandler(scootersRepository)
+	authService := &mockAuthService{}
+
+	scootersHandler := NewScootersHandler(scootersRepository, authService)
 
 	t.Run("Should pass given valid request body while creating scooter", func(t *testing.T) {
 		requestBody := types.CreateScooterRequest{
@@ -52,4 +54,26 @@ func (m *mockScootersRepository) CreateScooter(types.Scooter) error {
 
 func (m *mockScootersRepository) GetScooterById(string) (*types.Scooter, error) {
 	return nil, nil
+}
+
+type mockAuthService struct{}
+
+// AuthenticateAdmin implements types.IAuthService.
+func (m *mockAuthService) AuthenticateAdmin(c *gin.Context) bool {
+	panic("unimplemented")
+}
+
+// AuthenticateUser implements types.IAuthService.
+func (m *mockAuthService) AuthenticateUser(c *gin.Context) bool {
+	panic("unimplemented")
+}
+
+// GetAdminApiKey implements types.IAuthService.
+func (m *mockAuthService) GetAdminApiKey() string {
+	panic("unimplemented")
+}
+
+// GetUserApiKey implements types.IAuthService.
+func (m *mockAuthService) GetUserApiKey() string {
+	panic("unimplemented")
 }
