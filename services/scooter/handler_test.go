@@ -44,6 +44,16 @@ func TestScootersHandler(t *testing.T) {
 
 type mockScootersRepository struct{}
 
+// GetAllScooters implements types.IScootersRepository.
+func (m *mockScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
+	panic("unimplemented")
+}
+
+// GetScootersByArea implements types.IScootersRepository.
+func (m *mockScootersRepository) GetScootersByArea(queryParams types.GetScootersQueryParameters) ([]*types.Scooter, error) {
+	panic("unimplemented")
+}
+
 func (m *mockScootersRepository) GetScooters() ([]*types.Scooter, error) {
 	return nil, nil
 }

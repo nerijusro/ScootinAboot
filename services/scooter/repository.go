@@ -26,7 +26,32 @@ func (r *ScootersRepository) CreateScooter(scooter types.Scooter) error {
 	return nil
 }
 
-func (r *ScootersRepository) GetScooters() ([]*types.Scooter, error) {
+func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQueryParameters) ([]*types.Scooter, error) {
+	availabilityFilter := types.Availability(queryParams.Availability)
+	getScootersByAreaQuery := tryAddingAvailabilityFilter(
+		"SELECT * FROM scooters WHERE latitude >= ? AND latitude <= ? AND longitude >= ? AND longitude <= ?",
+		availabilityFilter)
+
+	rows, err := r.db.Query(getScootersByAreaQuery,
+		queryParams.Y1, queryParams.Y2, queryParams.X1, queryParams.X2)
+	if err != nil {
+		return nil, err
+	}
+
+	scooters := make([]*types.Scooter, 0)
+	for rows.Next() {
+		scooter, err := scanRowIntoScooter(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		scooters = append(scooters, scooter)
+	}
+
+	return scooters, nil
+}
+
+func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
 	rows, err := r.db.Query("SELECT * FROM scooters")
 	if err != nil {
 		return nil, err
@@ -77,4 +102,15 @@ func scanRowIntoScooter(row *sql.Rows) (*types.Scooter, error) {
 
 	scooter.Location = *location
 	return scooter, nil
+}
+
+func tryAddingAvailabilityFilter(query string, availability types.Availability) string {
+	if availability == types.Available {
+		return query + " AND is_available = true"
+	}
+	if availability == types.Unavailable {
+		return query + " AND is_available = false"
+	}
+
+	return query
 }

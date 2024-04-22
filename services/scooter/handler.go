@@ -8,22 +8,23 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-type ScootersHandler struct {
+type ScooterHandler struct {
 	repository  types.IScootersRepository
 	authService types.IAuthService
 }
 
-func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService) *ScootersHandler {
-	return &ScootersHandler{repository: repository, authService: authService}
+func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService) *ScooterHandler {
+	return &ScooterHandler{repository: repository, authService: authService}
 }
 
-func (h *ScootersHandler) RegisterEndpoints(e *gin.Engine) {
-	e.POST("/scooters", h.createScooter)
-	e.GET("/scooters", h.getScooters)
+func (h *ScooterHandler) RegisterEndpoints(e *gin.Engine) {
+	e.POST("/admin/scooters", h.createScooter)
+	e.GET("/admin/scooters", h.getAllScooters)
+	e.GET("/scooters", h.getScootersByArea)
 	e.GET("/scooters/:id", h.getScooter)
 }
 
-func (h *ScootersHandler) createScooter(c *gin.Context) {
+func (h *ScooterHandler) createScooter(c *gin.Context) {
 	if !h.authService.AuthenticateAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -51,13 +52,34 @@ func (h *ScootersHandler) createScooter(c *gin.Context) {
 	c.JSON(http.StatusCreated, scooter)
 }
 
-func (h *ScootersHandler) getScooters(c *gin.Context) {
+func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 	if !h.authService.AuthenticateUser(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	allScooters, err := h.repository.GetScooters()
+	var queryParameters types.GetScootersQueryParameters
+	if err := c.BindQuery(&queryParameters); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
+		return
+	}
+
+	scooters, err := h.repository.GetScootersByArea(queryParameters)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, scooters)
+}
+
+func (h *ScooterHandler) getAllScooters(c *gin.Context) {
+	if !h.authService.AuthenticateAdmin(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	allScooters, err := h.repository.GetAllScooters()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
 		return
@@ -66,8 +88,8 @@ func (h *ScootersHandler) getScooters(c *gin.Context) {
 	c.JSON(http.StatusOK, allScooters)
 }
 
-func (h *ScootersHandler) getScooter(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
+func (h *ScooterHandler) getScooter(c *gin.Context) {
+	if !h.authService.AuthenticateAdmin(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
@@ -75,7 +97,7 @@ func (h *ScootersHandler) getScooter(c *gin.Context) {
 	id := c.Param("id")
 	idInUUID, err := uuid.Parse(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err})
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}
 

@@ -24,7 +24,8 @@ type CreateScooterRequest struct {
 
 type IScootersRepository interface {
 	GetScooterById(id string) (*Scooter, error)
-	GetScooters() ([]*Scooter, error)
+	GetAllScooters() ([]*Scooter, error)
+	GetScootersByArea(queryParams GetScootersQueryParameters) ([]*Scooter, error)
 	CreateScooter(scooter Scooter) error
 }
 
@@ -53,3 +54,19 @@ type IClientsRepository interface {
 type CreateUserRequest struct {
 	FullName string `json:"full_name"`
 }
+
+type GetScootersQueryParameters struct {
+	Availability string  `form:"availability"`
+	X1           float64 `form:"x1"`
+	X2           float64 `form:"x2"`
+	Y1           float64 `form:"y1"`
+	Y2           float64 `form:"y2"`
+}
+
+type Availability string
+
+const (
+	Available   Availability = "available"
+	Unavailable Availability = "unavailable"
+	All         Availability = "all"
+)
