@@ -16,8 +16,8 @@ func NewScootersRepository(db *sql.DB) *ScootersRepository {
 	return &ScootersRepository{db: db}
 }
 
-func (s *ScootersRepository) CreateScooter(scooter types.Scooter) error {
-	_, err := s.db.Exec("INSERT INTO scooters (id, longitude, latitude, is_available) VALUES (UUID_TO_BIN(?, false), ?, ?, ?)",
+func (r *ScootersRepository) CreateScooter(scooter types.Scooter) error {
+	_, err := r.db.Exec("INSERT INTO scooters (id, longitude, latitude, is_available) VALUES (UUID_TO_BIN(?, false), ?, ?, ?)",
 		scooter.ID.String(), scooter.Location.Longitude, scooter.Location.Latitude, scooter.IsAvailable)
 	if err != nil {
 		return err
@@ -26,8 +26,8 @@ func (s *ScootersRepository) CreateScooter(scooter types.Scooter) error {
 	return nil
 }
 
-func (s *ScootersRepository) GetScooters() ([]*types.Scooter, error) {
-	rows, err := s.db.Query("SELECT * FROM scooters")
+func (r *ScootersRepository) GetScooters() ([]*types.Scooter, error) {
+	rows, err := r.db.Query("SELECT * FROM scooters")
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (s *ScootersRepository) GetScooters() ([]*types.Scooter, error) {
 	return scooters, nil
 }
 
-func (s *ScootersRepository) GetScooterById(id string) (*types.Scooter, error) {
-	rows, err := s.db.Query("SELECT * FROM scooters WHERE id = UUID_TO_BIN(?, false)", id)
+func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, error) {
+	rows, err := r.db.Query("SELECT * FROM scooters WHERE id = UUID_TO_BIN(?, false)", id)
 	if err != nil {
 		return nil, err
 	}

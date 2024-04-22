@@ -39,3 +39,17 @@ type IAuthService interface {
 	AuthenticateAdmin(c *gin.Context) bool
 	AuthenticateUser(c *gin.Context) bool
 }
+
+type MobileClient struct {
+	ID                 uuid.UUID `json:"id"`
+	FullName           string    `json:"full_name"`
+	IsEligibleToTravel bool      `json:"is_eligible_to_travel"`
+}
+
+type IClientsRepository interface {
+	CreateUser(client MobileClient) error
+}
+
+type CreateUserRequest struct {
+	FullName string `json:"full_name"`
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nerijusro/scootinAboot/services/auth"
+	"github.com/nerijusro/scootinAboot/services/client"
 	"github.com/nerijusro/scootinAboot/services/scooter"
 	"github.com/nerijusro/scootinAboot/types"
 )
@@ -29,7 +30,11 @@ func (s *APIServer) Run() error {
 	authHandler := auth.NewAuthorizationHandler(authService)
 	authHandler.RegisterEndpoints(ginEngine)
 
-	//Padaryt su DI
+	//Padaryt su DI. Galbūt service locator pattern
+	clientsRepository := client.NewClientsRepository(s.db)
+	clientHandler := client.NewClientsHandler(clientsRepository, authService)
+	clientHandler.RegisterEndpoints(ginEngine)
+
 	scootersRepository := scooter.NewScootersRepository(s.db)
 	scootersHandler := scooter.NewScootersHandler(scootersRepository, authService)
 	scootersHandler.RegisterEndpoints(ginEngine)

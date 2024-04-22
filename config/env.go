@@ -29,7 +29,7 @@ func initConfig() Config {
 		DBUser:               getEnv("DB_USER", "root"),
 		DBPassword:           getEnv("DB_PASSWORD", "root"),
 		DBAddress:            fmt.Sprintf("%s:%s", getEnv("DB_HOST", "localhost"), getEnv("DB_PORT", "3307")),
-		DBName:               getEnv("DB_NAME", "Scootin_aboot"),
+		DBName:               getEnv("DB_NAME", "scootin_aboot"),
 		Net:                  getEnv("DB_NET", "tcp"),
 		AllowNativePasswords: getEnv("DB_ALLOW_NATIVE_PASSWORDS", "true") == "true",
 		ParseTime:            getEnv("DB_PARSE_TIME", "true") == "true",
