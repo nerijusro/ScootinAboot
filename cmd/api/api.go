@@ -19,6 +19,16 @@ func NewAPIServer(address *types.ServerAddress, db *sql.DB) *APIServer {
 	return &APIServer{address: address, db: db}
 }
 
+// TODO
+// Padaryt service locatoriu
+// Testai
+// Trip endpointai
+// Child procesas
+// Dockerfile
+// Dokumentacija
+// .env faila uzpildyt
+// Kaip ir types grupavima butu gerai sutvarkyt
+// Auth service gal irgi ne vietoj?
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 
@@ -30,7 +40,6 @@ func (s *APIServer) Run() error {
 	authHandler := auth.NewAuthorizationHandler(authService)
 	authHandler.RegisterEndpoints(ginEngine)
 
-	//Padaryt su DI. Galbūt service locator pattern
 	clientsRepository := client.NewClientsRepository(s.db)
 	clientHandler := client.NewClientsHandler(clientsRepository, authService)
 	clientHandler.RegisterEndpoints(ginEngine)

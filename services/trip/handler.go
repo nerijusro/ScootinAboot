@@ -1,12 +1,18 @@
 package trip
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/nerijusro/scootinAboot/types"
+)
 
 type TripHandler struct {
+	authService types.IAuthService
 }
 
-func NewTripHandler() *TripHandler {
-	return &TripHandler{}
+func NewTripHandler(authService types.IAuthService) *TripHandler {
+	return &TripHandler{authService: authService}
 }
 
 func (h *TripHandler) RegisterEndpoints(e *gin.Engine) {
@@ -15,8 +21,17 @@ func (h *TripHandler) RegisterEndpoints(e *gin.Engine) {
 	e.GET("/trips/finish", h.finishTrip)
 }
 
+// Tripas turi:
+// - id
+// - scooterId
+// - clientId
+// - isFinished
 func (h *TripHandler) startTrip(c *gin.Context) {
-	// implementation of the startTrip method
+	if !h.authService.AuthenticateUser(c) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 }
 
 func (h *TripHandler) updateTrip(c *gin.Context) {

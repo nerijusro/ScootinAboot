@@ -3,7 +3,5 @@ CREATE TABLE IF NOT EXISTS scooters (
   `latitude` FLOAT NOT NULL,
   `longitude` FLOAT NOT NULL,
   `is_available` BOOLEAN NOT NULL DEFAULT FALSE,
-  `occupied_by` BINARY(16) DEFAULT NULL,
-  `opt_lock_version` INT NOT NULL DEFAULT 0,
-  UNIQUE (`occupied_by`)
+  `opt_lock_version` INT NOT NULL DEFAULT 0
 );

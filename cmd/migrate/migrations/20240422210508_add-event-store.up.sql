@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS events (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `trip_id` BINARY(16) NOT NULL,
+  `event_type` VARCHAR(255) NOT NULL,
+  `latitude` FLOAT NOT NULL,
+  `longitude` FLOAT NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sequence` INT NOT NULL,
+  FOREIGN KEY (`trip_id`) REFERENCES trips(`id`)
+);
