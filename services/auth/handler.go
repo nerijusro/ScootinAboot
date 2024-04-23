@@ -5,13 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/interfaces"
 )
 
 type AuthorizationHandler struct {
-	authService types.IAuthService
+	authService interfaces.AuthService
 }
 
-func NewAuthorizationHandler(authService types.IAuthService) *AuthorizationHandler {
+func NewAuthorizationHandler(authService interfaces.AuthService) *AuthorizationHandler {
 	return &AuthorizationHandler{authService: authService}
 }
 

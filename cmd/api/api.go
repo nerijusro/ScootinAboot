@@ -9,15 +9,15 @@ import (
 	"github.com/nerijusro/scootinAboot/services/client"
 	"github.com/nerijusro/scootinAboot/services/scooter"
 	"github.com/nerijusro/scootinAboot/services/trip"
-	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/utils"
 )
 
 type APIServer struct {
-	address *types.ServerAddress
+	address *utils.ServerAddress
 	db      *sql.DB
 }
 
-func NewAPIServer(address *types.ServerAddress, db *sql.DB) *APIServer {
+func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
 	return &APIServer{address: address, db: db}
 }
 
@@ -27,8 +27,6 @@ func NewAPIServer(address *types.ServerAddress, db *sql.DB) *APIServer {
 // Child procesas
 // Dockerfile
 // Dokumentacija
-// Kaip ir types grupavima butu gerai sutvarkyt
-// Auth service gal irgi ne vietoj?
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/enums"
 )
 
 type ScootersRepository struct {
@@ -27,7 +28,7 @@ func (r *ScootersRepository) CreateScooter(scooter types.Scooter) error {
 }
 
 func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQueryParameters) ([]*types.Scooter, error) {
-	availabilityFilter := types.Availability(queryParams.Availability)
+	availabilityFilter := enums.Availability(queryParams.Availability)
 	getScootersByAreaQuery := tryAddingAvailabilityFilter(
 		"SELECT * FROM scooters WHERE latitude >= ? AND latitude <= ? AND longitude >= ? AND longitude <= ?",
 		availabilityFilter)
@@ -104,11 +105,11 @@ func scanRowIntoScooter(row *sql.Rows, optLockVersion *int) (*types.Scooter, err
 	return scooter, nil
 }
 
-func tryAddingAvailabilityFilter(query string, availability types.Availability) string {
-	if availability == types.Available {
+func tryAddingAvailabilityFilter(query string, availability enums.Availability) string {
+	if availability == enums.Available {
 		return query + " AND is_available = true"
 	}
-	if availability == types.Unavailable {
+	if availability == enums.Unavailable {
 		return query + " AND is_available = false"
 	}
 

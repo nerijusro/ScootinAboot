@@ -6,15 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/interfaces"
 )
 
 type ScooterHandler struct {
-	repository  types.IScootersRepository
-	authService types.IAuthService
-	validator   types.IScootersValidator
+	repository  interfaces.ScootersRepository
+	authService interfaces.AuthService
+	validator   interfaces.ScootersValidator
 }
 
-func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService, validator types.IScootersValidator) *ScooterHandler {
+func NewScootersHandler(repository interfaces.ScootersRepository, authService interfaces.AuthService, validator interfaces.ScootersValidator) *ScooterHandler {
 	return &ScooterHandler{repository: repository, authService: authService, validator: validator}
 }
 

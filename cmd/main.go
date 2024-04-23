@@ -8,13 +8,13 @@ import (
 	"github.com/nerijusro/scootinAboot/cmd/api"
 	"github.com/nerijusro/scootinAboot/config"
 	"github.com/nerijusro/scootinAboot/db"
-	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/utils"
 )
 
 func main() {
 	db := createAndInitializeMySqlStorage()
 
-	serverAddress := types.NewServerAddress(config.Envs.PublicHost, config.Envs.Port)
+	serverAddress := utils.NewServerAddress(config.Envs.PublicHost, config.Envs.Port)
 	server := api.NewAPIServer(serverAddress, db)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)

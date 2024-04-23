@@ -6,14 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/interfaces"
 )
 
 type ClientHandler struct {
-	repository  types.IClientsRepository
-	authService types.IAuthService
+	repository  interfaces.ClientsRepository
+	authService interfaces.AuthService
 }
 
-func NewClientsHandler(repository types.IClientsRepository, authService types.IAuthService) *ClientHandler {
+func NewClientsHandler(repository interfaces.ClientsRepository, authService interfaces.AuthService) *ClientHandler {
 	return &ClientHandler{repository: repository, authService: authService}
 }
 

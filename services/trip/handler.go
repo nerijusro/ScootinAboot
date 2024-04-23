@@ -7,23 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/interfaces"
 	"github.com/nerijusro/scootinAboot/utils"
 )
 
 type TripHandler struct {
-	authService        types.IAuthService
-	validator          types.ITripsValidator
-	tripsReposiotry    types.ITripsRepository
-	scootersRepository types.IScootersRepository
-	usersRepository    types.IClientsRepository
+	authService        interfaces.AuthService
+	validator          interfaces.TripsValidator
+	tripsReposiotry    interfaces.TripsRepository
+	scootersRepository interfaces.ScootersRepository
+	usersRepository    interfaces.ClientsRepository
 }
 
 func NewTripHandler(
-	authService types.IAuthService,
-	validator types.ITripsValidator,
-	tripsRepository types.ITripsRepository,
-	scootersRepository types.IScootersRepository,
-	usersRepository types.IClientsRepository) *TripHandler {
+	authService interfaces.AuthService,
+	validator interfaces.TripsValidator,
+	tripsRepository interfaces.TripsRepository,
+	scootersRepository interfaces.ScootersRepository,
+	usersRepository interfaces.ClientsRepository) *TripHandler {
 	return &TripHandler{authService: authService, validator: validator, tripsReposiotry: tripsRepository, scootersRepository: scootersRepository, usersRepository: usersRepository}
 }
 
