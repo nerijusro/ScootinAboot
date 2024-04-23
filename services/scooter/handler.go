@@ -9,13 +9,13 @@ import (
 )
 
 type ScooterHandler struct {
-	repository       types.IScootersRepository
-	authService      types.IAuthService
-	requestValidator types.IScootersValidator
+	repository  types.IScootersRepository
+	authService types.IAuthService
+	validator   types.IScootersValidator
 }
 
 func NewScootersHandler(repository types.IScootersRepository, authService types.IAuthService, validator types.IScootersValidator) *ScooterHandler {
-	return &ScooterHandler{repository: repository, authService: authService, requestValidator: validator}
+	return &ScooterHandler{repository: repository, authService: authService, validator: validator}
 }
 
 func (h *ScooterHandler) RegisterEndpoints(e *gin.Engine) {
@@ -37,7 +37,7 @@ func (h *ScooterHandler) createScooter(c *gin.Context) {
 		return
 	}
 
-	if err := h.requestValidator.ValidateCreateScooterRequest(&scooterRequest); err != nil {
+	if err := h.validator.ValidateCreateScooterRequest(&scooterRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}
@@ -69,7 +69,7 @@ func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 		return
 	}
 
-	if err := h.requestValidator.ValidateGetScootersQueryParameters(&queryParameters); err != nil {
+	if err := h.validator.ValidateGetScootersQueryParameters(&queryParameters); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}
@@ -111,7 +111,7 @@ func (h *ScooterHandler) getScooter(c *gin.Context) {
 		return
 	}
 
-	scooter, err := h.repository.GetScooterById(idInUUID.String())
+	scooter, _, err := h.repository.GetScooterById(idInUUID.String())
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Not found": err.Error()})
 		return

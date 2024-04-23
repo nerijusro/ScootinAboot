@@ -9,13 +9,14 @@ import (
 
 type ScootersValidator struct{}
 
+var Validator = validator.New()
+
 func NewScootersValidator() *ScootersValidator {
 	return &ScootersValidator{}
 }
 
 func (s *ScootersValidator) ValidateCreateScooterRequest(request *types.CreateScooterRequest) error {
-	validator := validator.New()
-	if err := validator.Struct(request); err != nil {
+	if err := Validator.Struct(request); err != nil {
 		return err
 	}
 
@@ -31,8 +32,7 @@ func (s *ScootersValidator) ValidateCreateScooterRequest(request *types.CreateSc
 }
 
 func (s *ScootersValidator) ValidateGetScootersQueryParameters(queryParams *types.GetScootersQueryParameters) error {
-	validator := validator.New()
-	if err := validator.Struct(queryParams); err != nil {
+	if err := Validator.Struct(queryParams); err != nil {
 		return err
 	}
 

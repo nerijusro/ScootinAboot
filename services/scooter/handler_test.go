@@ -85,8 +85,8 @@ func (m *mockScootersRepository) CreateScooter(types.Scooter) error {
 	return nil
 }
 
-func (m *mockScootersRepository) GetScooterById(string) (*types.Scooter, error) {
-	return nil, nil
+func (m *mockScootersRepository) GetScooterById(string) (*types.Scooter, *int, error) {
+	return nil, nil, nil
 }
 
 type mockAuthService struct{}

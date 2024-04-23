@@ -40,7 +40,7 @@ func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQuer
 
 	scooters := make([]*types.Scooter, 0)
 	for rows.Next() {
-		scooter, err := scanRowIntoScooter(rows)
+		scooter, err := scanRowIntoScooter(rows, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +59,7 @@ func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
 
 	scooters := make([]*types.Scooter, 0)
 	for rows.Next() {
-		scooter, err := scanRowIntoScooter(rows)
+		scooter, err := scanRowIntoScooter(rows, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -70,33 +70,33 @@ func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
 	return scooters, nil
 }
 
-func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, error) {
+func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, *int, error) {
 	rows, err := r.db.Query("SELECT * FROM scooters WHERE id = UUID_TO_BIN(?, false)", id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	scooter := new(types.Scooter)
+	optLockVersion := new(int)
 	for rows.Next() {
-		scooter, err = scanRowIntoScooter(rows)
+		scooter, err = scanRowIntoScooter(rows, optLockVersion)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	if scooter.ID == uuid.Nil {
-		return nil, fmt.Errorf("scooter with id %s not found", id)
+		return nil, nil, fmt.Errorf("scooter with id %s not found", id)
 	}
 
-	return scooter, nil
+	return scooter, optLockVersion, nil
 }
 
-func scanRowIntoScooter(row *sql.Rows) (*types.Scooter, error) {
-	optlockVersion := new(int)
+func scanRowIntoScooter(row *sql.Rows, optLockVersion *int) (*types.Scooter, error) {
 	location := new(types.Location)
 	scooter := new(types.Scooter)
 
-	if err := row.Scan(&scooter.ID, &location.Latitude, &location.Longitude, &scooter.IsAvailable, &scooter.OccupiedBy, &optlockVersion); err != nil {
+	if err := row.Scan(&scooter.ID, &location.Latitude, &location.Longitude, &scooter.IsAvailable, optLockVersion); err != nil {
 		return nil, err
 	}
 

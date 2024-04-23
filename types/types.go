@@ -1,6 +1,8 @@
 package types
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -9,7 +11,6 @@ type Scooter struct {
 	ID          uuid.UUID `json:"id"`
 	Location    Location  `json:"location"`
 	IsAvailable bool      `json:"is_available"`
-	OccupiedBy  uuid.UUID `json:"occupied_by"`
 }
 
 type Location struct {
@@ -23,7 +24,7 @@ type CreateScooterRequest struct {
 }
 
 type IScootersRepository interface {
-	GetScooterById(id string) (*Scooter, error)
+	GetScooterById(id string) (*Scooter, *int, error)
 	GetAllScooters() ([]*Scooter, error)
 	GetScootersByArea(queryParams GetScootersQueryParameters) ([]*Scooter, error)
 	CreateScooter(scooter Scooter) error
@@ -49,6 +50,7 @@ type MobileClient struct {
 
 type IClientsRepository interface {
 	CreateUser(client MobileClient) error
+	GetUserById(id string) (*MobileClient, *int, error)
 }
 
 type CreateUserRequest struct {
@@ -74,4 +76,43 @@ const (
 type IScootersValidator interface {
 	ValidateCreateScooterRequest(request *CreateScooterRequest) error
 	ValidateGetScootersQueryParameters(queryParams *GetScootersQueryParameters) error
+}
+
+type StartTripRequest struct {
+	ScooterID uuid.UUID `json:"scooter_id" validate:"required"`
+	CreatedAt time.Time `json:"created_at" validate:"required"`
+}
+
+type TripUpdateRequest struct {
+	TripID    uuid.UUID `json:"trip_id" validate:"required"`
+	Location  Location  `json:"location" validate:"required"`
+	CreatedAt time.Time `json:"created_at" validate:"required"`
+	Sequence  int       `json:"sequence" validate:"required"`
+}
+
+type ITripsValidator interface {
+	ValidateStartTripRequest(request *StartTripRequest) error
+	ValidateTripUpdateRequest(request *TripUpdateRequest) error
+}
+
+type Trip struct {
+	ID         uuid.UUID `json:"id"`
+	ScooterId  uuid.UUID `json:"scooter"`
+	ClientId   uuid.UUID `json:"client_id"`
+	IsFinished bool      `json:"is_finished"`
+}
+
+type TripEvent struct {
+	TripID    uuid.UUID `json:"trip_id"`
+	Type      string    `json:"event_type"`
+	Location  Location  `json:"location"`
+	CreatedAt time.Time `json:"created_at"`
+	Sequence  int       `json:"sequence"`
+}
+
+type ITripsRepository interface {
+	GetTripById(id string) (*Trip, error)
+	StartTrip(trip Trip, scooterOptLockVersion *int, userOptLockVersion *int, event TripEvent) error
+	UpdateTrip(trip *Trip, scooterOptLockVersion *int, event TripEvent) error
+	EndTrip(trip *Trip, scooterOptLockVersion *int, userOptLockVersion *int, event TripEvent) error
 }

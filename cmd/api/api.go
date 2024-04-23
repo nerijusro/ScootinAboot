@@ -7,6 +7,7 @@ import (
 	"github.com/nerijusro/scootinAboot/services/auth"
 	"github.com/nerijusro/scootinAboot/services/client"
 	"github.com/nerijusro/scootinAboot/services/scooter"
+	"github.com/nerijusro/scootinAboot/services/trip"
 	"github.com/nerijusro/scootinAboot/types"
 )
 
@@ -48,6 +49,11 @@ func (s *APIServer) Run() error {
 	scootersRequestValidator := scooter.NewScootersValidator()
 	scootersHandler := scooter.NewScootersHandler(scootersRepository, authService, scootersRequestValidator)
 	scootersHandler.RegisterEndpoints(ginEngine)
+
+	tripsRepository := trip.NewTripsRepository(s.db)
+	tripsValidator := trip.NewTripsValidator()
+	tripHandler := trip.NewTripHandler(authService, tripsValidator, tripsRepository, scootersRepository, clientsRepository)
+	tripHandler.RegisterEndpoints(ginEngine)
 
 	ginEngine.Run(s.address.String())
 	return nil

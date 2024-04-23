@@ -22,7 +22,7 @@ func (h *ClientHandler) RegisterEndpoints(e *gin.Engine) {
 }
 
 func (h *ClientHandler) createUser(c *gin.Context) {
-	if !h.authService.AuthenticateAdmin(c) {
+	if !h.authService.AuthenticateUser(c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
@@ -34,8 +34,9 @@ func (h *ClientHandler) createUser(c *gin.Context) {
 	}
 
 	user := types.MobileClient{
-		ID:       uuid.New(),
-		FullName: userRequest.FullName,
+		ID:                 uuid.New(),
+		FullName:           userRequest.FullName,
+		IsEligibleToTravel: true,
 	}
 
 	err := h.repository.CreateUser(user)
