@@ -5,6 +5,10 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
+type EndpointHandler interface {
+	RegisterEndpoints(e *gin.Engine)
+}
+
 type AuthService interface {
 	GetAdminApiKey() string
 	GetUserApiKey() string

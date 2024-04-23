@@ -4,50 +4,29 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nerijusro/scootinAboot/config"
-	"github.com/nerijusro/scootinAboot/services/auth"
-	"github.com/nerijusro/scootinAboot/services/client"
-	"github.com/nerijusro/scootinAboot/services/scooter"
-	"github.com/nerijusro/scootinAboot/services/trip"
 	"github.com/nerijusro/scootinAboot/utils"
 )
 
 type APIServer struct {
-	address *utils.ServerAddress
-	db      *sql.DB
+	address        *utils.ServerAddress
+	db             *sql.DB
+	serviceLocator *utils.ServiceLocator
 }
 
-func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
-	return &APIServer{address: address, db: db}
+func NewAPIServer(address *utils.ServerAddress, db *sql.DB, serviceLocator *utils.ServiceLocator) *APIServer {
+	return &APIServer{address: address, db: db, serviceLocator: serviceLocator}
 }
 
 // TODO
-// Padaryt service locatoriu
 // Testai
 // Child procesas
 // Dockerfile
 // Dokumentacija
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
-
-	authService := auth.NewAuthService(config.Envs.StaticAdminApiKey, config.Envs.StaticUserApiKey)
-
-	authHandler := auth.NewAuthorizationHandler(authService)
-	authHandler.RegisterEndpoints(ginEngine)
-
-	clientsRepository := client.NewClientsRepository(s.db)
-	clientHandler := client.NewClientsHandler(clientsRepository, authService)
-	clientHandler.RegisterEndpoints(ginEngine)
-
-	scootersRepository := scooter.NewScootersRepository(s.db)
-	scootersRequestValidator := scooter.NewScootersValidator()
-	scootersHandler := scooter.NewScootersHandler(scootersRepository, authService, scootersRequestValidator)
-	scootersHandler.RegisterEndpoints(ginEngine)
-
-	tripsRepository := trip.NewTripsRepository(s.db)
-	tripsValidator := trip.NewTripsValidator()
-	tripHandler := trip.NewTripHandler(authService, tripsValidator, tripsRepository, scootersRepository, clientsRepository)
-	tripHandler.RegisterEndpoints(ginEngine)
+	for _, handler := range s.serviceLocator.EndpointHandlers {
+		handler.RegisterEndpoints(ginEngine)
+	}
 
 	ginEngine.Run(s.address.String())
 	return nil
