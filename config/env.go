@@ -17,6 +17,8 @@ type Config struct {
 	Net                  string
 	AllowNativePasswords bool
 	ParseTime            bool
+	StaticUserApiKey     string
+	StaticAdminApiKey    string
 }
 
 var Envs = initConfig()
@@ -33,6 +35,8 @@ func initConfig() Config {
 		Net:                  getEnv("DB_NET", "tcp"),
 		AllowNativePasswords: getEnv("DB_ALLOW_NATIVE_PASSWORDS", "true") == "true",
 		ParseTime:            getEnv("DB_PARSE_TIME", "true") == "true",
+		StaticUserApiKey:     getEnv("STATIC_USER_API_KEY", "my_static_user_api_key"),
+		StaticAdminApiKey:    getEnv("STATIC_ADMIN_API_KEY", "my_static_admin_api_key"),
 	}
 }
 

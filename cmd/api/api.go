@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nerijusro/scootinAboot/config"
 	"github.com/nerijusro/scootinAboot/services/auth"
 	"github.com/nerijusro/scootinAboot/services/client"
 	"github.com/nerijusro/scootinAboot/services/scooter"
@@ -23,20 +24,15 @@ func NewAPIServer(address *types.ServerAddress, db *sql.DB) *APIServer {
 // TODO
 // Padaryt service locatoriu
 // Testai
-// Trip endpointai
 // Child procesas
 // Dockerfile
 // Dokumentacija
-// .env faila uzpildyt
 // Kaip ir types grupavima butu gerai sutvarkyt
 // Auth service gal irgi ne vietoj?
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 
-	staticUserApiKey := "my_static_user_api_key"
-	staticAdminApiKey := "my_static_admin_api_key"
-
-	authService := auth.NewAuthService(staticAdminApiKey, staticUserApiKey)
+	authService := auth.NewAuthService(config.Envs.StaticAdminApiKey, config.Envs.StaticUserApiKey)
 
 	authHandler := auth.NewAuthorizationHandler(authService)
 	authHandler.RegisterEndpoints(ginEngine)
