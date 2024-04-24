@@ -22,6 +22,8 @@ func NewAPIServer(address *utils.ServerAddress, db *sql.DB, serviceLocator *util
 // Child procesas
 // Dockerfile
 // Dokumentacija
+// Gal iseitu autentifikacija i middleware
+// Data dump
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 	for _, handler := range s.serviceLocator.EndpointHandlers {

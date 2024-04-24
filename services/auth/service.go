@@ -3,28 +3,28 @@ package auth
 import "github.com/gin-gonic/gin"
 
 type AuthorizationService struct {
-	AdminApiKey string
-	UserApiKey  string
+	adminApiKey string
+	userApiKey  string
 }
 
 func NewAuthService(adminApiKey string, userApiKey string) *AuthorizationService {
-	return &AuthorizationService{AdminApiKey: adminApiKey, UserApiKey: userApiKey}
+	return &AuthorizationService{adminApiKey: adminApiKey, userApiKey: userApiKey}
 }
 
 func (s *AuthorizationService) AuthenticateUser(c *gin.Context) bool {
 	apiKey := c.GetHeader("X-API-Key")
-	return apiKey == s.AdminApiKey || apiKey == s.UserApiKey
+	return apiKey == s.adminApiKey || apiKey == s.userApiKey
 }
 
 func (s *AuthorizationService) AuthenticateAdmin(c *gin.Context) bool {
 	apiKey := c.GetHeader("X-API-Key")
-	return apiKey == s.AdminApiKey
+	return apiKey == s.adminApiKey
 }
 
 func (s *AuthorizationService) GetAdminApiKey() string {
-	return s.AdminApiKey
+	return s.adminApiKey
 }
 
 func (s *AuthorizationService) GetUserApiKey() string {
-	return s.UserApiKey
+	return s.userApiKey
 }

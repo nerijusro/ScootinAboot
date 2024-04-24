@@ -45,5 +45,9 @@ func (s *TripsValidator) ValidateTripUpdateRequest(request *types.TripUpdateRequ
 		return errors.New("invalid created_at")
 	}
 
+	if request.Sequence < 1 {
+		return errors.New("invalid sequence")
+	}
+
 	return nil
 }

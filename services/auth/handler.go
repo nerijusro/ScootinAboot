@@ -9,11 +9,11 @@ import (
 )
 
 type AuthorizationHandler struct {
-	authService interfaces.AuthService
+	authProvider interfaces.AuthProvider
 }
 
-func NewAuthorizationHandler(authService interfaces.AuthService) *AuthorizationHandler {
-	return &AuthorizationHandler{authService: authService}
+func NewAuthorizationHandler(authProvider interfaces.AuthProvider) *AuthorizationHandler {
+	return &AuthorizationHandler{authProvider: authProvider}
 }
 
 func (h *AuthorizationHandler) RegisterEndpoints(e *gin.Engine) {
@@ -22,11 +22,11 @@ func (h *AuthorizationHandler) RegisterEndpoints(e *gin.Engine) {
 }
 
 func (h *AuthorizationHandler) authorizeUser(c *gin.Context) {
-	apiKey := types.AuthResponse{StaticApiKey: h.authService.GetUserApiKey()}
+	apiKey := types.AuthResponse{StaticApiKey: h.authProvider.GetUserApiKey()}
 	c.JSON(http.StatusOK, apiKey)
 }
 
 func (h *AuthorizationHandler) authorizeAdmin(c *gin.Context) {
-	apiKey := types.AuthResponse{StaticApiKey: h.authService.GetAdminApiKey()}
+	apiKey := types.AuthResponse{StaticApiKey: h.authProvider.GetAdminApiKey()}
 	c.JSON(http.StatusOK, apiKey)
 }

@@ -10,11 +10,13 @@ type EndpointHandler interface {
 }
 
 type AuthService interface {
-	GetAdminApiKey() string
-	GetUserApiKey() string
-
 	AuthenticateAdmin(c *gin.Context) bool
 	AuthenticateUser(c *gin.Context) bool
+}
+
+type AuthProvider interface {
+	GetAdminApiKey() string
+	GetUserApiKey() string
 }
 
 type ScootersRepository interface {

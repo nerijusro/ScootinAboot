@@ -77,7 +77,7 @@ func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 
 	scooters, err := h.repository.GetScootersByArea(queryParameters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"Not Found": err.Error()})
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *ScooterHandler) getAllScooters(c *gin.Context) {
 
 	allScooters, err := h.repository.GetAllScooters()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"Not Found": err.Error()})
 		return
 	}
 

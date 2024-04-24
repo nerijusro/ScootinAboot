@@ -97,7 +97,7 @@ func scanRowIntoScooter(row *sql.Rows, optLockVersion *int) (*types.Scooter, err
 	location := new(types.Location)
 	scooter := new(types.Scooter)
 
-	if err := row.Scan(&scooter.ID, &location.Latitude, &location.Longitude, &scooter.IsAvailable, optLockVersion); err != nil {
+	if err := row.Scan(&scooter.ID, &location.Latitude, &location.Longitude, &scooter.IsAvailable, &optLockVersion); err != nil {
 		return nil, err
 	}
 
