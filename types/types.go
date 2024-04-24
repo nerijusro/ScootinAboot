@@ -55,10 +55,10 @@ type StartTripRequest struct {
 }
 
 type TripUpdateRequest struct {
-	TripID    uuid.UUID `json:"trip_id" validate:"required"`
-	Location  Location  `json:"location" validate:"required"`
-	CreatedAt time.Time `json:"created_at" validate:"required"`
-	Sequence  int       `json:"sequence" validate:"required"`
+	Location    Location  `json:"location" validate:"required"`
+	CreatedAt   time.Time `json:"created_at" validate:"required"`
+	IsFinishing bool      `json:"is_finishing"`
+	Sequence    int       `json:"sequence" validate:"required"`
 }
 
 // Query parameters

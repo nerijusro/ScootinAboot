@@ -8,11 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
 	"github.com/nerijusro/scootinAboot/types/interfaces"
-	"github.com/nerijusro/scootinAboot/utils"
 )
 
 type TripHandler struct {
-	authService        interfaces.AuthService
 	validator          interfaces.TripsValidator
 	tripsReposiotry    interfaces.TripsRepository
 	scootersRepository interfaces.ScootersRepository
@@ -20,23 +18,24 @@ type TripHandler struct {
 }
 
 func NewTripHandler(
-	authService interfaces.AuthService,
 	validator interfaces.TripsValidator,
 	tripsRepository interfaces.TripsRepository,
 	scootersRepository interfaces.ScootersRepository,
 	usersRepository interfaces.ClientsRepository) *TripHandler {
-	return &TripHandler{authService: authService, validator: validator, tripsReposiotry: tripsRepository, scootersRepository: scootersRepository, usersRepository: usersRepository}
+	return &TripHandler{validator: validator, tripsReposiotry: tripsRepository, scootersRepository: scootersRepository, usersRepository: usersRepository}
 }
 
-func (h *TripHandler) RegisterEndpoints(e *gin.Engine) {
-	e.POST("/trips/start", h.startTrip)
-	e.PUT("/trips/status", h.updateTrip)
-	e.PUT("/trips/finish", h.finishTrip)
+func (h *TripHandler) RegisterEndpoints(routerGroups map[string]*gin.RouterGroup) {
+	userAuthorized := routerGroups["client"]
+	userAuthorized.POST("/trips", h.startTrip)
+	userAuthorized.PUT("/trips/:id", h.updateTrip)
 }
 
 func (h *TripHandler) startTrip(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	clientId := c.GetHeader("Client-Id")
+	_, err := uuid.Parse(clientId)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": err.Error()})
 		return
 	}
 
@@ -51,19 +50,13 @@ func (h *TripHandler) startTrip(c *gin.Context) {
 		return
 	}
 
-	clientId, err := utils.GetClientIdFromRequest(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": err.Error()})
-		return
-	}
-
 	scooter, scooterOptLockVersion, err := h.scootersRepository.GetScooterById(startTripRequest.ScooterID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting scooter by id"})
 		return
 	}
 
-	user, userOptLockVersion, err := h.usersRepository.GetUserById(clientId.String())
+	user, userOptLockVersion, err := h.usersRepository.GetUserById(clientId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting user by id"})
 		return
@@ -98,35 +91,38 @@ func (h *TripHandler) startTrip(c *gin.Context) {
 }
 
 func (h *TripHandler) updateTrip(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	var updateTripRequest types.TripUpdateRequest
-	if err := c.BindJSON(&updateTripRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})
-		return
-	}
-
-	if err := h.validator.ValidateTripUpdateRequest(&updateTripRequest); err != nil {
+	tripId := c.Param("id")
+	_, err := uuid.Parse(tripId)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
 		return
 	}
 
-	clientId, err := utils.GetClientIdFromRequest(c)
+	clientId := c.GetHeader("Client-Id")
+	_, err = uuid.Parse(clientId)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": err.Error()})
 		return
 	}
 
-	trip, err := h.tripsReposiotry.GetTripById(updateTripRequest.TripID.String())
+	var request types.TripUpdateRequest
+	if err := c.BindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})
+		return
+	}
+
+	if err := h.validator.ValidateTripUpdateRequest(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
+		return
+	}
+
+	trip, err := h.tripsReposiotry.GetTripById(tripId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting trip by id"})
 		return
 	}
 
-	if trip.ClientId.String() != clientId.String() {
+	if trip.ClientId.String() != clientId {
 		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": "user is not allowed to update this trip"})
 		return
 	}
@@ -144,84 +140,31 @@ func (h *TripHandler) updateTrip(c *gin.Context) {
 
 	tripEvent := types.TripEvent{
 		TripID:    trip.ID,
-		Type:      "update_trip_event",
-		Location:  updateTripRequest.Location,
-		CreatedAt: updateTripRequest.CreatedAt,
-		Sequence:  updateTripRequest.Sequence,
+		Location:  request.Location,
+		CreatedAt: request.CreatedAt,
+		Sequence:  request.Sequence,
 	}
 
-	err = h.tripsReposiotry.UpdateTrip(trip, scooterOptLockVersion, tripEvent)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be updated"})
-		return
-	}
+	if !request.IsFinishing {
+		tripEvent.Type = "update_trip_event"
+		err = h.tripsReposiotry.UpdateTrip(trip, scooterOptLockVersion, tripEvent)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be updated"})
+			return
+		}
+	} else {
+		_, userOptLockVersion, err := h.usersRepository.GetUserById(clientId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting user by id"})
+			return
+		}
 
-	c.JSON(http.StatusOK, tripEvent)
-}
-
-func (h *TripHandler) finishTrip(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	var finishTripRequest types.TripUpdateRequest
-	if err := c.BindJSON(&finishTripRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})
-		return
-	}
-
-	if err := h.validator.ValidateTripUpdateRequest(&finishTripRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
-		return
-	}
-
-	clientId, err := utils.GetClientIdFromRequest(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": err.Error()})
-		return
-	}
-
-	trip, err := h.tripsReposiotry.GetTripById(finishTripRequest.TripID.String())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting trip by id"})
-		return
-	}
-
-	if trip.ClientId != clientId {
-		c.JSON(http.StatusUnauthorized, gin.H{"Unauthorized request": "user is not allowed to finish this trip"})
-		return
-	}
-
-	if trip.IsFinished {
-		c.JSON(http.StatusBadRequest, gin.H{"Bad request": "trip is already finished"})
-		return
-	}
-
-	_, scooterOptLockVersion, err := h.scootersRepository.GetScooterById(trip.ScooterId.String())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting scooter by id"})
-		return
-	}
-
-	_, userOptLockVersion, err := h.usersRepository.GetUserById(clientId.String())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "error getting user by id"})
-		return
-	}
-
-	tripEvent := types.TripEvent{
-		TripID:    trip.ID,
-		Type:      "finish_trip_event",
-		Location:  finishTripRequest.Location,
-		CreatedAt: finishTripRequest.CreatedAt,
-		Sequence:  finishTripRequest.Sequence,
-	}
-
-	err = h.tripsReposiotry.EndTrip(trip, scooterOptLockVersion, userOptLockVersion, tripEvent)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be finished"})
-		return
+		tripEvent.Type = "finish_trip_event"
+		err = h.tripsReposiotry.EndTrip(trip, scooterOptLockVersion, userOptLockVersion, tripEvent)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be finished"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, tripEvent)

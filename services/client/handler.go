@@ -10,24 +10,19 @@ import (
 )
 
 type ClientHandler struct {
-	repository  interfaces.ClientsRepository
-	authService interfaces.AuthService
+	repository interfaces.ClientsRepository
 }
 
-func NewClientsHandler(repository interfaces.ClientsRepository, authService interfaces.AuthService) *ClientHandler {
-	return &ClientHandler{repository: repository, authService: authService}
+func NewClientsHandler(repository interfaces.ClientsRepository) *ClientHandler {
+	return &ClientHandler{repository: repository}
 }
 
-func (h *ClientHandler) RegisterEndpoints(e *gin.Engine) {
-	e.POST("/users", h.createUser)
+func (h *ClientHandler) RegisterEndpoints(routerGroups map[string]*gin.RouterGroup) {
+	userAuthorized := routerGroups["client"]
+	userAuthorized.POST("/users", h.createUser)
 }
 
 func (h *ClientHandler) createUser(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
 	var userRequest types.CreateUserRequest
 	if err := c.BindJSON(&userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})

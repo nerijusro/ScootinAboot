@@ -10,28 +10,25 @@ import (
 )
 
 type ScooterHandler struct {
-	repository  interfaces.ScootersRepository
-	authService interfaces.AuthService
-	validator   interfaces.ScootersValidator
+	repository interfaces.ScootersRepository
+	validator  interfaces.ScootersValidator
 }
 
-func NewScootersHandler(repository interfaces.ScootersRepository, authService interfaces.AuthService, validator interfaces.ScootersValidator) *ScooterHandler {
-	return &ScooterHandler{repository: repository, authService: authService, validator: validator}
+func NewScootersHandler(repository interfaces.ScootersRepository, validator interfaces.ScootersValidator) *ScooterHandler {
+	return &ScooterHandler{repository: repository, validator: validator}
 }
 
-func (h *ScooterHandler) RegisterEndpoints(e *gin.Engine) {
-	e.POST("/admin/scooters", h.createScooter)
-	e.GET("/admin/scooters", h.getAllScooters)
-	e.GET("/scooters", h.getScootersByArea)
-	e.GET("/scooters/:id", h.getScooter)
+func (h *ScooterHandler) RegisterEndpoints(routerGroups map[string]*gin.RouterGroup) {
+	adminAuthorized := routerGroups["admin"]
+	adminAuthorized.POST("/scooters", h.createScooter)
+	adminAuthorized.GET("/scooters", h.getAllScooters)
+
+	userAuthorized := routerGroups["client"]
+	userAuthorized.GET("/scooters", h.getScootersByArea)
+	userAuthorized.GET("/scooters/:id", h.getScooter)
 }
 
 func (h *ScooterHandler) createScooter(c *gin.Context) {
-	if !h.authService.AuthenticateAdmin(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
 	var scooterRequest types.CreateScooterRequest
 	if err := c.BindJSON(&scooterRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request body": err.Error()})
@@ -59,11 +56,6 @@ func (h *ScooterHandler) createScooter(c *gin.Context) {
 }
 
 func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
-	if !h.authService.AuthenticateUser(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
 	var queryParameters types.GetScootersQueryParameters
 	if err := c.BindQuery(&queryParameters); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Bad request": err.Error()})
@@ -81,30 +73,20 @@ func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, scooters)
+	c.JSON(http.StatusOK, gin.H{"scooters": scooters})
 }
 
 func (h *ScooterHandler) getAllScooters(c *gin.Context) {
-	if !h.authService.AuthenticateAdmin(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
 	allScooters, err := h.repository.GetAllScooters()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Not Found": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, allScooters)
+	c.JSON(http.StatusOK, gin.H{"scooters": allScooters})
 }
 
 func (h *ScooterHandler) getScooter(c *gin.Context) {
-	if !h.authService.AuthenticateAdmin(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
 	id := c.Param("id")
 	idInUUID, err := uuid.Parse(id)
 	if err != nil {

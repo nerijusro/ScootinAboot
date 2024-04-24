@@ -13,7 +13,7 @@ type ScootersRepository struct {
 	db *sql.DB
 }
 
-func NewScootersRepository(db *sql.DB) *ScootersRepository {
+func NewRepository(db *sql.DB) *ScootersRepository {
 	return &ScootersRepository{db: db}
 }
 
@@ -41,7 +41,7 @@ func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQuer
 
 	scooters := make([]*types.Scooter, 0)
 	for rows.Next() {
-		scooter, err := scanRowIntoScooter(rows, nil)
+		scooter, _, err := scanRowIntoScooter(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +60,7 @@ func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
 
 	scooters := make([]*types.Scooter, 0)
 	for rows.Next() {
-		scooter, err := scanRowIntoScooter(rows, nil)
+		scooter, _, err := scanRowIntoScooter(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -77,10 +77,10 @@ func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, *int, er
 		return nil, nil, err
 	}
 
-	scooter := new(types.Scooter)
-	optLockVersion := new(int)
+	var scooter *types.Scooter
+	var optLockVersion *int
 	for rows.Next() {
-		scooter, err = scanRowIntoScooter(rows, optLockVersion)
+		scooter, optLockVersion, err = scanRowIntoScooter(rows)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -93,16 +93,17 @@ func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, *int, er
 	return scooter, optLockVersion, nil
 }
 
-func scanRowIntoScooter(row *sql.Rows, optLockVersion *int) (*types.Scooter, error) {
-	location := new(types.Location)
-	scooter := new(types.Scooter)
+func scanRowIntoScooter(row *sql.Rows) (*types.Scooter, *int, error) {
+	var location types.Location
+	var scooter types.Scooter
+	var optLockVersion int
 
 	if err := row.Scan(&scooter.ID, &location.Latitude, &location.Longitude, &scooter.IsAvailable, &optLockVersion); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	scooter.Location = *location
-	return scooter, nil
+	scooter.Location = location
+	return &scooter, &optLockVersion, nil
 }
 
 func tryAddingAvailabilityFilter(query string, availability enums.Availability) string {

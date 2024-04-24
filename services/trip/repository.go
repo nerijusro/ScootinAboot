@@ -12,7 +12,7 @@ type TripsRepository struct {
 
 var publishEventQuery = "INSERT INTO events (trip_id, event_type, latitude, longitude, created_at, sequence) VALUES (UUID_TO_BIN(?, false), ?, ?, ?, ?, ?)"
 
-func NewTripsRepository(db *sql.DB) *TripsRepository {
+func NewRepository(db *sql.DB) *TripsRepository {
 	return &TripsRepository{db: db}
 }
 

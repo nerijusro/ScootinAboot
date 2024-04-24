@@ -6,12 +6,12 @@ import (
 )
 
 type EndpointHandler interface {
-	RegisterEndpoints(e *gin.Engine)
+	RegisterEndpoints(routerGroups map[string]*gin.RouterGroup)
 }
 
 type AuthService interface {
-	AuthenticateAdmin(c *gin.Context) bool
-	AuthenticateUser(c *gin.Context) bool
+	AuthenticateAdmin(c *gin.Context)
+	AuthenticateClient(c *gin.Context)
 }
 
 type AuthProvider interface {
