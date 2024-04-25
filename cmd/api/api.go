@@ -27,7 +27,6 @@ func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
 // Dockerfile
 // Dokumentacija
 // Data dump
-// opt lock nereportina
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 

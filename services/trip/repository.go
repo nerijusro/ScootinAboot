@@ -2,6 +2,8 @@ package trip
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/nerijusro/scootinAboot/types"
 )
@@ -11,6 +13,8 @@ type TripRepository struct {
 }
 
 var publishEventQuery = "INSERT INTO events (trip_id, event_type, latitude, longitude, created_at, sequence) VALUES (UUID_TO_BIN(?, false), ?, ?, ?, ?, ?)"
+var updateScooterQuery = "UPDATE scooters SET is_available = ?, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
+var updateUserQuery = "UPDATE users SET is_eligible_to_travel = ?, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 
 func NewRepository(db *sql.DB) *TripRepository {
 	return &TripRepository{db: db}
@@ -18,8 +22,6 @@ func NewRepository(db *sql.DB) *TripRepository {
 
 func (r *TripRepository) StartTrip(trip types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
 	createTripQuery := "INSERT INTO trips (id, user_id, scooter_id) VALUES (UUID_TO_BIN(?, false), UUID_TO_BIN(?, false), UUID_TO_BIN(?, false))"
-	updateScooterQuery := "UPDATE scooters SET is_available = false, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
-	updateUserQuery := "UPDATE users SET is_eligible_to_travel = false, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 
 	tx, err := r.db.Begin()
 	if err != nil {
@@ -32,13 +34,13 @@ func (r *TripRepository) StartTrip(trip types.Trip, scooterOptLockVersion *int, 
 		return err
 	}
 
-	_, err = tx.Exec(updateScooterQuery, *scooterOptLockVersion, trip.ScooterId.String(), *scooterOptLockVersion)
+	err = r.updateAvailablity(tx, updateScooterQuery, trip.ScooterId.String(), false, scooterOptLockVersion)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	_, err = tx.Exec(updateUserQuery, *userOptLockVersion, trip.ClientId.String(), *userOptLockVersion)
+	err = r.updateAvailablity(tx, updateUserQuery, trip.ClientId.String(), false, userOptLockVersion)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -65,10 +67,21 @@ func (r *TripRepository) UpdateTrip(trip *types.Trip, scooterOptLockVersion *int
 		return err
 	}
 
-	_, err = tx.Exec(updateScootersLocationQuery, event.Location.Latitude, event.Location.Longitude, *scooterOptLockVersion, trip.ScooterId.String(), *scooterOptLockVersion)
+	scooterUpdateResult, err := tx.Exec(updateScootersLocationQuery, event.Location.Latitude, event.Location.Longitude, *scooterOptLockVersion, trip.ScooterId.String(), *scooterOptLockVersion)
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	rowsAffecter, err := scooterUpdateResult.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffecter == 0 {
+		tx.Rollback()
+		return errors.New("scooter was updated by another transaction")
 	}
 
 	_, err = tx.Exec(publishEventQuery, event.TripID.String(), event.Type, event.Location.Latitude, event.Location.Longitude, event.CreatedAt, event.Sequence)
@@ -86,8 +99,6 @@ func (r *TripRepository) UpdateTrip(trip *types.Trip, scooterOptLockVersion *int
 
 func (r *TripRepository) EndTrip(trip *types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
 	updateTripQuery := "UPDATE trips SET is_finished = true WHERE id = UUID_TO_BIN(?, false)"
-	updateScooterQuery := "UPDATE scooters SET is_available = true, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
-	updateUserQuery := "UPDATE users SET is_eligible_to_travel = true, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 
 	tx, err := r.db.Begin()
 	if err != nil {
@@ -100,13 +111,13 @@ func (r *TripRepository) EndTrip(trip *types.Trip, scooterOptLockVersion *int, u
 		return err
 	}
 
-	_, err = tx.Exec(updateScooterQuery, *scooterOptLockVersion, trip.ScooterId.String(), *scooterOptLockVersion)
+	err = r.updateAvailablity(tx, updateScooterQuery, trip.ScooterId.String(), true, scooterOptLockVersion)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	_, err = tx.Exec(updateUserQuery, *userOptLockVersion, trip.ClientId.String(), *userOptLockVersion)
+	err = r.updateAvailablity(tx, updateUserQuery, trip.ClientId.String(), true, userOptLockVersion)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -134,5 +145,30 @@ func (r *TripRepository) GetTripById(id string) (*types.Trip, error) {
 		return nil, err
 	}
 
+	if trip.ID.String() != id {
+		return nil, fmt.Errorf("trip with id %s not found", id)
+	}
+
 	return &trip, nil
+}
+
+func (r *TripRepository) updateAvailablity(tx *sql.Tx, query string, id string, newValue bool, optLockVersion *int) error {
+	rowUpdateResult, err := tx.Exec(query, newValue, *optLockVersion, id, *optLockVersion)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rowsAffecter, err := rowUpdateResult.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffecter == 0 {
+		tx.Rollback()
+		return errors.New("row was updated by another transaction")
+	}
+
+	return nil
 }

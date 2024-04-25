@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
 	"github.com/nerijusro/scootinAboot/types/enums"
 )
@@ -86,7 +85,7 @@ func (r *ScooterRepository) GetScooterById(id string) (*types.Scooter, *int, err
 		}
 	}
 
-	if scooter.ID == uuid.Nil {
+	if scooter == nil {
 		return nil, nil, fmt.Errorf("scooter with id %s not found", id)
 	}
 
