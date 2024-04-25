@@ -23,12 +23,11 @@ func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
 }
 
 // TODO
-// trip handler testai
 // Child procesas
 // Dockerfile
 // Dokumentacija
-// Gal iseitu autentifikacija i middleware
 // Data dump
+// opt lock nereportina
 func (s *APIServer) Run() error {
 	ginEngine := gin.Default()
 
@@ -53,11 +52,11 @@ func buildServiceLocator(db *sql.DB) *utils.ServiceLocator {
 	clientHandler := client.NewClientsHandler(clientsRepository)
 
 	scootersRepository := scooter.NewRepository(db)
-	scootersRequestValidator := scooter.NewScootersValidator()
-	scootersHandler := scooter.NewScootersHandler(scootersRepository, scootersRequestValidator)
+	scootersRequestValidator := scooter.NewScooterValidator()
+	scootersHandler := scooter.NewScooterHandler(scootersRepository, scootersRequestValidator)
 
 	tripsRepository := trip.NewRepository(db)
-	tripsValidator := trip.NewTripsValidator()
+	tripsValidator := trip.NewTripValidator()
 	tripHandler := trip.NewTripHandler(tripsValidator, tripsRepository, scootersRepository, clientsRepository)
 
 	serviceLocator := &utils.ServiceLocator{

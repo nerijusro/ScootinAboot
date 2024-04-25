@@ -6,17 +6,17 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-type TripsRepository struct {
+type TripRepository struct {
 	db *sql.DB
 }
 
 var publishEventQuery = "INSERT INTO events (trip_id, event_type, latitude, longitude, created_at, sequence) VALUES (UUID_TO_BIN(?, false), ?, ?, ?, ?, ?)"
 
-func NewRepository(db *sql.DB) *TripsRepository {
-	return &TripsRepository{db: db}
+func NewRepository(db *sql.DB) *TripRepository {
+	return &TripRepository{db: db}
 }
 
-func (r *TripsRepository) StartTrip(trip types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
+func (r *TripRepository) StartTrip(trip types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
 	createTripQuery := "INSERT INTO trips (id, user_id, scooter_id) VALUES (UUID_TO_BIN(?, false), UUID_TO_BIN(?, false), UUID_TO_BIN(?, false))"
 	updateScooterQuery := "UPDATE scooters SET is_available = false, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 	updateUserQuery := "UPDATE users SET is_eligible_to_travel = false, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
@@ -57,7 +57,7 @@ func (r *TripsRepository) StartTrip(trip types.Trip, scooterOptLockVersion *int,
 	return nil
 }
 
-func (r *TripsRepository) UpdateTrip(trip *types.Trip, scooterOptLockVersion *int, event types.TripEvent) error {
+func (r *TripRepository) UpdateTrip(trip *types.Trip, scooterOptLockVersion *int, event types.TripEvent) error {
 	updateScootersLocationQuery := "UPDATE scooters SET latitude = ?, longitude = ?, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 
 	tx, err := r.db.Begin()
@@ -84,7 +84,7 @@ func (r *TripsRepository) UpdateTrip(trip *types.Trip, scooterOptLockVersion *in
 	return nil
 }
 
-func (r *TripsRepository) EndTrip(trip *types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
+func (r *TripRepository) EndTrip(trip *types.Trip, scooterOptLockVersion *int, userOptLockVersion *int, event types.TripEvent) error {
 	updateTripQuery := "UPDATE trips SET is_finished = true WHERE id = UUID_TO_BIN(?, false)"
 	updateScooterQuery := "UPDATE scooters SET is_available = true, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
 	updateUserQuery := "UPDATE users SET is_eligible_to_travel = true, opt_lock_version = ? + 1 WHERE id = UUID_TO_BIN(?, false) AND opt_lock_version = ?"
@@ -125,7 +125,7 @@ func (r *TripsRepository) EndTrip(trip *types.Trip, scooterOptLockVersion *int, 
 	return nil
 }
 
-func (r *TripsRepository) GetTripById(id string) (*types.Trip, error) {
+func (r *TripRepository) GetTripById(id string) (*types.Trip, error) {
 	row := r.db.QueryRow("SELECT * FROM trips WHERE id = UUID_TO_BIN(?, false)", id)
 
 	var trip types.Trip

@@ -8,15 +8,15 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-type TripsValidator struct{}
+type TripValidator struct{}
 
 var Validator = validator.New()
 
-func NewTripsValidator() *TripsValidator {
-	return &TripsValidator{}
+func NewTripValidator() *TripValidator {
+	return &TripValidator{}
 }
 
-func (s *TripsValidator) ValidateStartTripRequest(request *types.StartTripRequest) error {
+func (s *TripValidator) ValidateStartTripRequest(request *types.StartTripRequest) error {
 	if err := Validator.Struct(request); err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func (s *TripsValidator) ValidateStartTripRequest(request *types.StartTripReques
 	return nil
 }
 
-func (s *TripsValidator) ValidateTripUpdateRequest(request *types.TripUpdateRequest) error {
+func (s *TripValidator) ValidateTripUpdateRequest(request *types.TripUpdateRequest) error {
 	if err := Validator.Struct(request); err != nil {
 		return err
 	}

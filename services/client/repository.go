@@ -6,15 +6,15 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-type ClientsRepository struct {
+type ClientRepository struct {
 	db *sql.DB
 }
 
-func NewRepository(db *sql.DB) *ClientsRepository {
-	return &ClientsRepository{db: db}
+func NewRepository(db *sql.DB) *ClientRepository {
+	return &ClientRepository{db: db}
 }
 
-func (r *ClientsRepository) CreateUser(client types.MobileClient) error {
+func (r *ClientRepository) CreateUser(client types.MobileClient) error {
 	_, err := r.db.Exec("INSERT INTO users (id, full_name) VALUES (UUID_TO_BIN(?, false), ?)",
 		client.ID.String(), client.FullName)
 	if err != nil {
@@ -24,7 +24,7 @@ func (r *ClientsRepository) CreateUser(client types.MobileClient) error {
 	return nil
 }
 
-func (r *ClientsRepository) GetUserById(id string) (*types.MobileClient, *int, error) {
+func (r *ClientRepository) GetUserById(id string) (*types.MobileClient, *int, error) {
 	row := r.db.QueryRow("SELECT * FROM users WHERE id = UUID_TO_BIN(?, false)", id)
 
 	var client types.MobileClient

@@ -9,15 +9,15 @@ import (
 	"github.com/nerijusro/scootinAboot/types/enums"
 )
 
-type ScootersRepository struct {
+type ScooterRepository struct {
 	db *sql.DB
 }
 
-func NewRepository(db *sql.DB) *ScootersRepository {
-	return &ScootersRepository{db: db}
+func NewRepository(db *sql.DB) *ScooterRepository {
+	return &ScooterRepository{db: db}
 }
 
-func (r *ScootersRepository) CreateScooter(scooter types.Scooter) error {
+func (r *ScooterRepository) CreateScooter(scooter types.Scooter) error {
 	_, err := r.db.Exec("INSERT INTO scooters (id, longitude, latitude, is_available) VALUES (UUID_TO_BIN(?, false), ?, ?, ?)",
 		scooter.ID.String(), scooter.Location.Longitude, scooter.Location.Latitude, scooter.IsAvailable)
 	if err != nil {
@@ -27,7 +27,7 @@ func (r *ScootersRepository) CreateScooter(scooter types.Scooter) error {
 	return nil
 }
 
-func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQueryParameters) ([]*types.Scooter, error) {
+func (r *ScooterRepository) GetScootersByArea(queryParams types.GetScootersQueryParameters) ([]*types.Scooter, error) {
 	availabilityFilter := enums.Availability(queryParams.Availability)
 	getScootersByAreaQuery := tryAddingAvailabilityFilter(
 		"SELECT * FROM scooters WHERE latitude >= ? AND latitude <= ? AND longitude >= ? AND longitude <= ?",
@@ -52,7 +52,7 @@ func (r *ScootersRepository) GetScootersByArea(queryParams types.GetScootersQuer
 	return scooters, nil
 }
 
-func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
+func (r *ScooterRepository) GetAllScooters() ([]*types.Scooter, error) {
 	rows, err := r.db.Query("SELECT * FROM scooters")
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (r *ScootersRepository) GetAllScooters() ([]*types.Scooter, error) {
 	return scooters, nil
 }
 
-func (r *ScootersRepository) GetScooterById(id string) (*types.Scooter, *int, error) {
+func (r *ScooterRepository) GetScooterById(id string) (*types.Scooter, *int, error) {
 	rows, err := r.db.Query("SELECT * FROM scooters WHERE id = UUID_TO_BIN(?, false)", id)
 	if err != nil {
 		return nil, nil, err

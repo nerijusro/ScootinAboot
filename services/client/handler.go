@@ -10,10 +10,10 @@ import (
 )
 
 type ClientHandler struct {
-	repository interfaces.ClientsRepository
+	repository interfaces.ClientRepository
 }
 
-func NewClientsHandler(repository interfaces.ClientsRepository) *ClientHandler {
+func NewClientsHandler(repository interfaces.ClientRepository) *ClientHandler {
 	return &ClientHandler{repository: repository}
 }
 

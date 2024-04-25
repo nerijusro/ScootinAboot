@@ -7,15 +7,15 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-type ScootersValidator struct{}
+type ScooterValidator struct{}
 
 var Validator = validator.New()
 
-func NewScootersValidator() *ScootersValidator {
-	return &ScootersValidator{}
+func NewScooterValidator() *ScooterValidator {
+	return &ScooterValidator{}
 }
 
-func (s *ScootersValidator) ValidateCreateScooterRequest(request *types.CreateScooterRequest) error {
+func (s *ScooterValidator) ValidateCreateScooterRequest(request *types.CreateScooterRequest) error {
 	if err := Validator.Struct(request); err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (s *ScootersValidator) ValidateCreateScooterRequest(request *types.CreateSc
 	return nil
 }
 
-func (s *ScootersValidator) ValidateGetScootersQueryParameters(queryParams *types.GetScootersQueryParameters) error {
+func (s *ScooterValidator) ValidateGetScootersQueryParameters(queryParams *types.GetScootersQueryParameters) error {
 	if err := Validator.Struct(queryParams); err != nil {
 		return err
 	}

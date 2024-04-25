@@ -7,21 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/nerijusro/scootinAboot/types"
+	"github.com/nerijusro/scootinAboot/types/enums"
 	"github.com/nerijusro/scootinAboot/types/interfaces"
 )
 
 type TripHandler struct {
-	validator          interfaces.TripsValidator
-	tripsReposiotry    interfaces.TripsRepository
-	scootersRepository interfaces.ScootersRepository
-	usersRepository    interfaces.ClientsRepository
+	validator          interfaces.TripValidator
+	tripsReposiotry    interfaces.TripRepository
+	scootersRepository interfaces.ScooterRepository
+	usersRepository    interfaces.ClientRepository
 }
 
 func NewTripHandler(
-	validator interfaces.TripsValidator,
-	tripsRepository interfaces.TripsRepository,
-	scootersRepository interfaces.ScootersRepository,
-	usersRepository interfaces.ClientsRepository) *TripHandler {
+	validator interfaces.TripValidator,
+	tripsRepository interfaces.TripRepository,
+	scootersRepository interfaces.ScooterRepository,
+	usersRepository interfaces.ClientRepository) *TripHandler {
 	return &TripHandler{validator: validator, tripsReposiotry: tripsRepository, scootersRepository: scootersRepository, usersRepository: usersRepository}
 }
 
@@ -75,7 +76,7 @@ func (h *TripHandler) startTrip(c *gin.Context) {
 
 	startTripEvent := types.TripEvent{
 		TripID:    trip.ID,
-		Type:      "start_trip_event",
+		Type:      enums.StartTrip,
 		Location:  scooter.Location,
 		CreatedAt: startTripRequest.CreatedAt,
 		Sequence:  1,
@@ -87,7 +88,7 @@ func (h *TripHandler) startTrip(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, startTripEvent)
+	c.JSON(http.StatusCreated, startTripEvent)
 }
 
 func (h *TripHandler) updateTrip(c *gin.Context) {
@@ -146,7 +147,7 @@ func (h *TripHandler) updateTrip(c *gin.Context) {
 	}
 
 	if !request.IsFinishing {
-		tripEvent.Type = "update_trip_event"
+		tripEvent.Type = enums.UpdateTrip
 		err = h.tripsReposiotry.UpdateTrip(trip, scooterOptLockVersion, tripEvent)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be updated"})
@@ -159,7 +160,7 @@ func (h *TripHandler) updateTrip(c *gin.Context) {
 			return
 		}
 
-		tripEvent.Type = "finish_trip_event"
+		tripEvent.Type = enums.EndTrip
 		err = h.tripsReposiotry.EndTrip(trip, scooterOptLockVersion, userOptLockVersion, tripEvent)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Internal Server Error": err.Error(), "message": "trip could not be finished"})

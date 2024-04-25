@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/nerijusro/scootinAboot/types/enums"
 )
 
 // Entities
@@ -32,11 +33,11 @@ type Trip struct {
 }
 
 type TripEvent struct {
-	TripID    uuid.UUID `json:"trip_id"`
-	Type      string    `json:"event_type"`
-	Location  Location  `json:"location"`
-	CreatedAt time.Time `json:"created_at"`
-	Sequence  int       `json:"sequence"`
+	TripID    uuid.UUID           `json:"trip_id"`
+	Type      enums.TripEventType `json:"event_type"`
+	Location  Location            `json:"location"`
+	CreatedAt time.Time           `json:"created_at"`
+	Sequence  int                 `json:"sequence"`
 }
 
 // Requests
@@ -73,4 +74,8 @@ type GetScootersQueryParameters struct {
 // Responses
 type AuthResponse struct {
 	StaticApiKey string
+}
+
+type GetScootersResponse struct {
+	Scooters []*Scooter `json:"scooters"`
 }

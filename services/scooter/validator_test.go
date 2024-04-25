@@ -6,8 +6,8 @@ import (
 	"github.com/nerijusro/scootinAboot/types"
 )
 
-func TestScootersValidator(t *testing.T) {
-	validator := NewScootersValidator()
+func TestScooterValidator(t *testing.T) {
+	validator := NewScooterValidator()
 
 	t.Run("When validating create scooter request while given valid request body returns nil", func(t *testing.T) {
 		requestBody := types.CreateScooterRequest{

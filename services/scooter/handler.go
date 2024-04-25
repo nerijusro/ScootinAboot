@@ -10,11 +10,11 @@ import (
 )
 
 type ScooterHandler struct {
-	repository interfaces.ScootersRepository
-	validator  interfaces.ScootersValidator
+	repository interfaces.ScooterRepository
+	validator  interfaces.ScooterValidator
 }
 
-func NewScootersHandler(repository interfaces.ScootersRepository, validator interfaces.ScootersValidator) *ScooterHandler {
+func NewScooterHandler(repository interfaces.ScooterRepository, validator interfaces.ScooterValidator) *ScooterHandler {
 	return &ScooterHandler{repository: repository, validator: validator}
 }
 
@@ -73,7 +73,10 @@ func (h *ScooterHandler) getScootersByArea(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"scooters": scooters})
+	response := types.GetScootersResponse{
+		Scooters: scooters,
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *ScooterHandler) getAllScooters(c *gin.Context) {
@@ -83,7 +86,10 @@ func (h *ScooterHandler) getAllScooters(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"scooters": allScooters})
+	response := types.GetScootersResponse{
+		Scooters: allScooters,
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *ScooterHandler) getScooter(c *gin.Context) {
