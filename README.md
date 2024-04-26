@@ -1,5 +1,21 @@
 # Scootin with Nerijus Aboot
 
+## Prerequisites
+There was a seperate tool used to run database migrations, so in order to run the project, the following is needed:
+https://github.com/golang-migrate/migrate/tree/v4.17.0/cmd/migrate
+
+## Running the project locally
+Before following through, make sure that you have a MySql database running on your machine, or feel free to swap any other storage under `/db`.
+
+Once storage is running, create a database (solution expects `scootin_aboot`- config file must be edited in case other name is prefered) and run the migration:
+```
+make migrate-up
+```
+That will create neccessary tables. Once that is done, run the project with:
+```
+make run
+```
+
 ## Authentication
 Since assignment was kind enough to only require a static api key for authentication, it must be attached to a header as `x-api-key` for every request (except `auth`). As one's eye might catch, endpoints are grouped into `admin` and `user`. These groups have different api keys, though `admin` one can be used to call `client` endpoints as well.
 
