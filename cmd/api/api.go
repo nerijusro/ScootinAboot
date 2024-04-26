@@ -24,10 +24,6 @@ func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
 	return &APIServer{address: address, db: db}
 }
 
-// TODO
-// Child procesas
-// Dockerfile
-// Dokumentacija
 func (s *APIServer) Run(wg *sync.WaitGroup) error {
 	ginEngine := gin.Default()
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/nerijusro/scootinAboot/cmd/api"
+
 	"github.com/nerijusro/scootinAboot/cmd/child"
 	"github.com/nerijusro/scootinAboot/config"
 	"github.com/nerijusro/scootinAboot/db"
@@ -52,6 +53,6 @@ func createAndInitializeMySqlStorage() *sql.DB {
 func initStorage(db *sql.DB) {
 	err := db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 }
