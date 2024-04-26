@@ -8,6 +8,15 @@
 - [Running the tests](#running-the-tests)
 - [Authentication](#authentication)
 - [Endpoints](#endpoints)
+  - [Method: `GET`, URL: `/client/auth`](#get-client-auth)
+  - [Method: `GET`, URL: `/admin/auth`](#get-admin-auth)
+  - [Method: `POST`, URL: `/client/users`](#post-client-users)
+  - [Method: `POST`, URL: `/admin/scooters`](#post-admin-scooters)
+  - [Method: `GET`, URL: `/admin/scooters`](#get-admin-scooters)
+  - [Method: `GET`, URL: `/client/scooters`](#get-client-scooters)
+  - [Method: `GET`, URL: `/client/scooters/:id`](#get-client-scooters)
+  - [Method: `POST`, URL: `/client/trips`](#post-client-trips)
+  - [Method: `PUT`, URL: `/client/trips/:id`](#put-client-trips)
 
 ## Prerequisites
 There was a seperate tool used to run database migrations, so in order to run the project, the following is needed:
