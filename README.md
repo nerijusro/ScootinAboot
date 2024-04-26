@@ -1,5 +1,14 @@
 # Scootin with Nerijus Aboot
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Running the project locally](#running-the-project-locally)
+- [Running the project using Docker](#running-the-project-using-docker)
+- [Running the tests](#running-the-tests)
+- [Authentication](#authentication)
+- [Endpoints](#endpoints)
+
 ## Prerequisites
 There was a seperate tool used to run database migrations, so in order to run the project, the following is needed:
 https://github.com/golang-migrate/migrate/tree/v4.17.0/cmd/migrate
@@ -16,7 +25,7 @@ That will create neccessary tables. Once that is done, run the project with:
 make run
 ```
 
-## Running the project locally
+## Running the project using Docker
 To run the server on docker, build the `docker-compose.yml` file using Terminal in the project's directory with:
 ```
 docker-compose build
