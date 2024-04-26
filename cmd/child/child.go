@@ -45,36 +45,31 @@ func (c *MobileClientDummy) Run(wg *sync.WaitGroup) {
 
 	wg.Add(1)
 	go c.simulateClient(wg, *clientStaticApiKey, clientOne)
-	time.Sleep(1 * time.Second)
 
 	wg.Add(1)
 	go c.simulateClient(wg, *clientStaticApiKey, clientTwo)
-	time.Sleep(1 * time.Second)
 
 	wg.Add(1)
 	go c.simulateClient(wg, *clientStaticApiKey, clientThree)
-	time.Sleep(1 * time.Second)
 }
 
 func (c *MobileClientDummy) simulateClient(wg *sync.WaitGroup, staticApiKey string, client *types.MobileClient) error {
+	defer wg.Done()
 	for i := 0; i > -1; i++ {
-		err := c.simulateTrip(wg, staticApiKey, client.ID.String())
+		err := c.simulateTrip(staticApiKey, client.ID.String())
 		if err != nil {
-			log.Fatal(err)
 			break
 		}
 
-		i++
 		time.Sleep(5 * time.Second)
 	}
 
 	return nil
 }
 
-func (c *MobileClientDummy) simulateTrip(wg *sync.WaitGroup, staticApiKey string, clientID string) error {
+func (c *MobileClientDummy) simulateTrip(staticApiKey string, clientID string) error {
 	scootersResponse, err := c.getScootersInArea(staticApiKey, 24.0, 26.0, 53.0, 55.0)
 	if err != nil {
-		wg.Done()
 		log.Fatal(err)
 		return err
 	}
@@ -82,8 +77,11 @@ func (c *MobileClientDummy) simulateTrip(wg *sync.WaitGroup, staticApiKey string
 	scooter := scootersResponse.Scooters[rand.Intn(len(scootersResponse.Scooters))]
 	startTripResponse, err := c.startTrip(staticApiKey, clientID, scooter.ID)
 	if err != nil {
-		log.Fatal(err)
 		return err
+	}
+
+	if startTripResponse == nil {
+		return nil
 	}
 
 	var newLocation types.Location
@@ -120,7 +118,6 @@ func (c *MobileClientDummy) simulateTrip(wg *sync.WaitGroup, staticApiKey string
 		})
 
 	if err != nil {
-		wg.Done()
 		log.Fatal(err)
 		return err
 	}
@@ -175,7 +172,14 @@ func (c *MobileClientDummy) startTrip(staticApiKey string, clientID string, scoo
 
 	if resp.StatusCode != http.StatusCreated {
 		log.Println("Expected status code 201 but got", resp.StatusCode)
-		return nil, err
+
+		var response map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			log.Fatal(err)
+		}
+
+		log.Print("Message", response)
+		return nil, nil
 	}
 
 	var tripEvent types.TripEvent
@@ -230,7 +234,7 @@ func (c *MobileClientDummy) createScooters(staticApiKey string) error {
 	}
 
 	marshalledRequestBody, _ := json.Marshal(requestBody)
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		request, err := http.NewRequest(http.MethodPost, c.basePath+"/admin/scooters", bytes.NewBuffer(marshalledRequestBody))
 		if err != nil {
 			log.Fatal(err)
