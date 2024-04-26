@@ -18,8 +18,8 @@ func NewAuthorizationHandler(authProvider interfaces.AuthProvider) *Authorizatio
 
 func (h *AuthorizationHandler) RegisterEndpoints(routerGroups map[string]*gin.RouterGroup) {
 	rootGroup := routerGroups["root"]
-	rootGroup.GET("/authUser", h.authorizeUser)
-	rootGroup.GET("/authAdmin", h.authorizeAdmin)
+	rootGroup.GET("/client/auth", h.authorizeUser)
+	rootGroup.GET("/admin/auth", h.authorizeAdmin)
 }
 
 func (h *AuthorizationHandler) authorizeUser(c *gin.Context) {

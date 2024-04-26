@@ -2,21 +2,31 @@ package utils
 
 import "strings"
 
-var serverAddressSeparator = ":"
-
 type ServerAddress struct {
-	host string
-	port string
+	protocol string
+	host     string
+	port     string
 }
 
-func NewServerAddress(host string, port string) *ServerAddress {
-	return &ServerAddress{host: host, port: port}
+func NewServerAddress(protocol string, host string, port string) *ServerAddress {
+	return &ServerAddress{protocol: protocol, host: host, port: port}
 }
 
 func (s *ServerAddress) String() string {
 	var serverAddress strings.Builder
 	serverAddress.WriteString(s.host)
-	serverAddress.WriteString(serverAddressSeparator)
+	serverAddress.WriteString(":")
+	serverAddress.WriteString(s.port)
+
+	return serverAddress.String()
+}
+
+func (s *ServerAddress) StringInclProtocol() string {
+	var serverAddress strings.Builder
+	serverAddress.WriteString(s.protocol)
+	serverAddress.WriteString("://")
+	serverAddress.WriteString(s.host)
+	serverAddress.WriteString(":")
 	serverAddress.WriteString(s.port)
 
 	return serverAddress.String()

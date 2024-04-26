@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Protocol             string
 	PublicHost           string
 	Port                 string
 	DBUser               string
@@ -26,6 +27,7 @@ var Envs = initConfig()
 func initConfig() Config {
 	godotenv.Load()
 	return Config{
+		Protocol:             getEnv("PROTOCOL", "http"),
 		PublicHost:           getEnv("PUBLIC_HOST", "localhost"),
 		Port:                 getEnv("PORT", "8080"),
 		DBUser:               getEnv("DB_USER", "root"),

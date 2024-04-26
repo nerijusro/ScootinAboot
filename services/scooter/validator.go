@@ -48,12 +48,20 @@ func (s *ScooterValidator) ValidateGetScootersQueryParameters(queryParams *types
 		return errors.New("invalid X2")
 	}
 
+	if queryParams.X1 > queryParams.X2 {
+		return errors.New("X1 must be less than X2")
+	}
+
 	if queryParams.Y1 < -90 || queryParams.Y1 > 90 {
 		return errors.New("invalid Y1")
 	}
 
 	if queryParams.Y2 < -90 || queryParams.Y2 > 90 {
 		return errors.New("invalid Y2")
+	}
+
+	if queryParams.Y1 > queryParams.Y2 {
+		return errors.New("Y1 must be less than Y2")
 	}
 
 	return nil

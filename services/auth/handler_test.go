@@ -14,10 +14,10 @@ func TestAuthorizationHandler(t *testing.T) {
 
 	t.Run("When authorizing user returns user api key", func(t *testing.T) {
 		router := gin.Default()
-		router.GET("/authUser", handler.authorizeUser)
+		router.GET("/client/auth", handler.authorizeUser)
 
 		responseRecoreder := httptest.NewRecorder()
-		router.ServeHTTP(responseRecoreder, httptest.NewRequest(http.MethodGet, "/authUser", nil))
+		router.ServeHTTP(responseRecoreder, httptest.NewRequest(http.MethodGet, "/client/auth", nil))
 
 		if responseRecoreder.Code != http.StatusOK {
 			t.Errorf("expected status code %d but got %d", http.StatusOK, responseRecoreder.Code)
@@ -26,10 +26,10 @@ func TestAuthorizationHandler(t *testing.T) {
 
 	t.Run("When authorizing admin returns admin api key", func(t *testing.T) {
 		router := gin.Default()
-		router.GET("/authAdmin", handler.authorizeAdmin)
+		router.GET("/admin/auth", handler.authorizeAdmin)
 
 		responseRecoreder := httptest.NewRecorder()
-		router.ServeHTTP(responseRecoreder, httptest.NewRequest(http.MethodGet, "/authAdmin", nil))
+		router.ServeHTTP(responseRecoreder, httptest.NewRequest(http.MethodGet, "/admin/auth", nil))
 
 		if responseRecoreder.Code != http.StatusOK {
 			t.Errorf("expected status code %d but got %d", http.StatusOK, responseRecoreder.Code)

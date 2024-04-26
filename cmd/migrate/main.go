@@ -42,6 +42,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
 	if cmd == "down" {
 		if err = m.Down(); err != nil && err != migrate.ErrNoChange {
 			log.Fatal(err)

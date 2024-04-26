@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"log"
+	"sync"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/nerijusro/scootinAboot/cmd/api"
+	"github.com/nerijusro/scootinAboot/cmd/child"
 	"github.com/nerijusro/scootinAboot/config"
 	"github.com/nerijusro/scootinAboot/db"
 	"github.com/nerijusro/scootinAboot/utils"
@@ -14,11 +16,17 @@ import (
 func main() {
 	db := createAndInitializeMySqlStorage()
 
-	serverAddress := utils.NewServerAddress(config.Envs.PublicHost, config.Envs.Port)
+	serverAddress := utils.NewServerAddress(config.Envs.Protocol, config.Envs.PublicHost, config.Envs.Port)
 	server := api.NewAPIServer(serverAddress, db)
-	if err := server.Run(); err != nil {
-		log.Fatal(err)
+	mobileClientDummy := child.NewMobileClientDummy(serverAddress.StringInclProtocol())
+
+	var wg sync.WaitGroup
+	if err := server.Run(&wg); err != nil {
+		log.Println("Error starting Gin server:", err)
 	}
+
+	go mobileClientDummy.Run(&wg)
+	wg.Wait()
 }
 
 func createAndInitializeMySqlStorage() *sql.DB {

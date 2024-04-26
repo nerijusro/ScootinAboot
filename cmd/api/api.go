@@ -2,6 +2,8 @@ package api
 
 import (
 	"database/sql"
+	"log"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nerijusro/scootinAboot/config"
@@ -26,8 +28,7 @@ func NewAPIServer(address *utils.ServerAddress, db *sql.DB) *APIServer {
 // Child procesas
 // Dockerfile
 // Dokumentacija
-// Data dump
-func (s *APIServer) Run() error {
+func (s *APIServer) Run(wg *sync.WaitGroup) error {
 	ginEngine := gin.Default()
 
 	serviceLocator := buildServiceLocator(s.db)
@@ -38,7 +39,14 @@ func (s *APIServer) Run() error {
 		handler.RegisterEndpoints(routerGroups)
 	}
 
-	ginEngine.Run(s.address.String())
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := ginEngine.Run(s.address.String()); err != nil {
+			log.Println("Error starting server:", err.Error())
+		}
+	}()
+
 	return nil
 }
 

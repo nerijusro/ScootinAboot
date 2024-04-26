@@ -105,6 +105,21 @@ func TestScooterValidator(t *testing.T) {
 		}
 	})
 
+	t.Run("When validating get scooters query while x1 is greater than x2 returns error", func(t *testing.T) {
+		requestBody := types.GetScootersQueryParameters{
+			Availability: "available",
+			X1:           26.0,
+			X2:           25.0,
+			Y1:           54.0,
+			Y2:           55.0,
+		}
+
+		result := validator.ValidateGetScootersQueryParameters(&requestBody)
+		if result.Error() != "X1 must be less than X2" {
+			t.Errorf("expected result to be x1 must be less than x2, got %s", result.Error())
+		}
+	})
+
 	t.Run("When validating get scooters query while given invalid y1 returns error", func(t *testing.T) {
 		requestBody := types.GetScootersQueryParameters{
 			Availability: "available",
@@ -132,6 +147,21 @@ func TestScooterValidator(t *testing.T) {
 		result := validator.ValidateGetScootersQueryParameters(&requestBody)
 		if result.Error() != "invalid Y2" {
 			t.Errorf("expected result to be invalid y2, got %s", result.Error())
+		}
+	})
+
+	t.Run("When validating get scooters query while y1 is greater than y2 returns error", func(t *testing.T) {
+		requestBody := types.GetScootersQueryParameters{
+			Availability: "available",
+			X1:           26.0,
+			X2:           27.0,
+			Y1:           57.0,
+			Y2:           55.0,
+		}
+
+		result := validator.ValidateGetScootersQueryParameters(&requestBody)
+		if result.Error() != "Y1 must be less than Y2" {
+			t.Errorf("expected result to be y1 must be less than y2, got %s", result.Error())
 		}
 	})
 }
