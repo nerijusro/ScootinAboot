@@ -16,6 +16,25 @@ That will create neccessary tables. Once that is done, run the project with:
 make run
 ```
 
+## Running the project locally
+To run the server on docker, build the `docker-compose.yml` file using Terminal in the project's directory with:
+```
+docker-compose build
+```
+
+And run it:
+```
+docker-compose -d up
+```
+
+MySql database is launched together with the server, so no need to launch the migrations seperately.
+
+## Running the tests
+Test can be launched using command:
+```
+make test
+```
+
 ## Authentication
 Since assignment was kind enough to only require a static api key for authentication, it must be attached to a header as `x-api-key` for every request (except `auth`). As one's eye might catch, endpoints are grouped into `admin` and `user`. These groups have different api keys, though `admin` one can be used to call `client` endpoints as well.
 
