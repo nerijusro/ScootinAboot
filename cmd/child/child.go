@@ -329,7 +329,7 @@ func (c *MobileClientDummy) getRetryableClient() *retryablehttp.Client {
 
 func (c *MobileClientDummy) getNewRandomLocation() types.Location {
 	return types.Location{
-		Latitude:  53 + rand.Float64()*(55-53),
-		Longitude: 24 + rand.Float64()*(26-24),
+		Latitude:  53 + rand.Float64()*(2),
+		Longitude: 24 + rand.Float64()*(2),
 	}
 }
