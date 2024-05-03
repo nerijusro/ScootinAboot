@@ -19,7 +19,7 @@ func main() {
 
 	serverAddress := utils.NewServerAddress(config.Envs.Protocol, config.Envs.PublicHost, config.Envs.Port)
 	server := api.NewAPIServer(serverAddress, db)
-	mobileClientDummy := child.NewMobileClientDummy("http://127.0.0.1:8080")
+	mobileClientDummy := child.NewMobileClientDummy("http://localhost:8080")
 
 	var wg sync.WaitGroup
 	if err := server.Run(&wg); err != nil {

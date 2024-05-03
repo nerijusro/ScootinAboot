@@ -166,7 +166,7 @@ func (c *MobileClientDummy) startTrip(staticApiKey string, clientID string, scoo
 	request.Header.Set("client-id", clientID)
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
-		log.Println("Error creating scooter", err)
+		log.Println("Error creating trip", err)
 		return nil, err
 	}
 
