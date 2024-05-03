@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/nerijusro/scootinAboot/types"
 	"github.com/nerijusro/scootinAboot/types/enums"
 )
@@ -295,7 +296,8 @@ func (c *MobileClientDummy) getStaticApiKey(role string) (*string, error) {
 	url.WriteString(role)
 	url.WriteString("/auth")
 
-	resp, err := http.Get(url.String())
+	client := c.getRetryableClient()
+	resp, err := client.Get(url.String())
 	if err != nil {
 		log.Println("Error getting static api key", err)
 		return nil, err
@@ -313,6 +315,16 @@ func (c *MobileClientDummy) getStaticApiKey(role string) (*string, error) {
 	}
 
 	return &authResponse.StaticApiKey, nil
+}
+
+func (c *MobileClientDummy) getRetryableClient() *retryablehttp.Client {
+	client := retryablehttp.NewClient()
+	client.RetryMax = 5
+	client.RetryWaitMin = 1 * time.Second
+	client.RetryWaitMax = 5 * time.Second
+	client.Logger = nil
+
+	return client
 }
 
 func (c *MobileClientDummy) getNewRandomLocation() types.Location {
