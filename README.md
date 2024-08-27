@@ -1,5 +1,3 @@
-# Scootin with Nerijus Aboot
-
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
